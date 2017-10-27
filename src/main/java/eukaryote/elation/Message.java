@@ -5,16 +5,29 @@ import java.io.IOException;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
+
+import lombok.Getter;
 
 public class Message {
+	
 	long timestamp;
+	
 	String content;
+	
 	String room;
+	
 	byte[] sender;
+	
 	byte[] parent;
+	
 	int nonce;
+	
 	byte[] signature;
 	
+	/**
+	 * Encode to bytes
+	 */
 	public byte[] encodeAsBytes() throws IOException {
 		MessageBufferPacker ret = MessagePack.newDefaultBufferPacker();
 		
@@ -40,5 +53,22 @@ public class Message {
 		ret.close();
 		
 		return bytes;
+	}
+	
+	
+	/**
+	 * Unpack message from bytes
+	 */
+	public Message(byte[] encoded) throws IOException {
+		MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(encoded);
+		
+		nonce = unpacker.unpackInt();
+		sender = unpacker.readPayload(unpacker.unpackBinaryHeader());
+		parent = unpacker.readPayload(unpacker.unpackBinaryHeader());
+		timestamp = unpacker.unpackLong();
+		room = unpacker.unpackString();
+		content = unpacker.unpackString();
+		signature = unpacker.readPayload(unpacker.unpackBinaryHeader());
+		
 	}
 }
