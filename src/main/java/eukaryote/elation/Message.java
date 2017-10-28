@@ -9,6 +9,7 @@ import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
 
+import eukaryote.elation.crypto.HashFunctions;
 import eukaryote.elation.crypto.KeyManager;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -83,9 +84,16 @@ public class Message {
 
 			return bytes;
 		}
+		
+		public byte[] hash() throws IOException {
+			return HashFunctions.hash160(encodeAsBytes());
+		}
 
-		public void doPOW() {
-			// TODO: implement pow
+		public void doPOW() throws IOException {
+			// TODO: adjustable difficulty
+			while(hash()[0] != 0) {
+				nonce++;
+			}
 		}
 
 	}
