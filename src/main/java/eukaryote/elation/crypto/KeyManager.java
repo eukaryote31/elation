@@ -24,14 +24,15 @@ import org.apache.commons.io.FileUtils;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
-public class KeyManager {
+public class KeyManager extends PublicKeyManager {
 	private KeyPair pair;
+
 	@Getter
 	private PrivateKey privateKey;
-	@Getter
-	private PublicKey publicKey;
 
 	public KeyManager() throws NoSuchAlgorithmException, NoSuchProviderException {
+		super();
+
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 		keyGen.initialize(2048);
 
@@ -42,6 +43,8 @@ public class KeyManager {
 
 	public KeyManager(File pkeyfile)
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
+		super();
+
 		byte[] pkeybytes = FileUtils.readFileToByteArray(pkeyfile);
 		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(pkeybytes);
 		KeyFactory kf = KeyFactory.getInstance("RSA");
