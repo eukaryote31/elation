@@ -1,4 +1,8 @@
-apply plugin: 'java-library'
+ plugins {
+    id 'java-library'
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.6.3'
+}
 
 repositories {
     jcenter()
@@ -16,5 +20,12 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
 }
 
