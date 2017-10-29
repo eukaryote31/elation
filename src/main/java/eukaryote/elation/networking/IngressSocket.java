@@ -1,4 +1,4 @@
-package eukaryote.elation;
+package eukaryote.elation.networking;
 
 import java.io.IOException;
 import java.util.Queue;
@@ -11,7 +11,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 @WebSocket
-public class IncomingSocket {
+public class IngressSocket {
 	private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
 	
     @OnWebSocketConnect
