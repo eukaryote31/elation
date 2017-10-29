@@ -22,7 +22,7 @@ public interface MessageDBO {
 	@SqlUpdate("CREATE  INDEX IF NOT EXISTS `ix_messages_room` ON `messages` (`room` );")
 	void createRoomIndex();
 
-	@SqlUpdate("INSERT INTO `messages`(`hash`,`timestamp`,`content`,`room`,`sender`,`parent`,`nonce`,`signature`) "
+	@SqlUpdate("INSERT OR IGNORE INTO `messages`(`hash`,`timestamp`,`content`,`room`,`sender`,`parent`,`nonce`,`signature`) "
 			+ "VALUES (:hash,:timestamp,:content,:room,:sender,:parent,:nonce,:signature);")
 	void putMessage(@Bind("hash") byte[] hash, @Bind("timestamp") long timestamp, @Bind("content") String content,
 			@Bind("room") String room, @Bind("sender") byte[] sender, @Bind("parent") byte[] parent,

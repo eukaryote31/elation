@@ -3,7 +3,9 @@ package eukaryote.elation;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -11,6 +13,7 @@ import org.msgpack.core.MessageUnpacker;
 
 import eukaryote.elation.crypto.HashFunctions;
 import eukaryote.elation.crypto.KeyManager;
+import eukaryote.elation.crypto.PublicKeyManager;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -66,7 +69,7 @@ public class Message {
 		/**
 		 * Encode to bytes
 		 */
-		private byte[] encodeAsBytes() throws UnpackingException {
+		private byte[] encodeAsBytes() throws PackingException {
 			try (MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
 
 				ret.packInt(nonce);
@@ -87,11 +90,11 @@ public class Message {
 
 				return bytes;
 			} catch (IOException e) {
-				throw new UnpackingException();
+				throw new PackingException();
 			}
 		}
 
-		public byte[] hash() throws IOException {
+		public byte[] hash() {
 			return HashFunctions.hash160(encodeAsBytes());
 		}
 
@@ -134,7 +137,7 @@ public class Message {
 	/**
 	 * Encode to bytes
 	 */
-	private byte[] encodeAsBytes() throws UnpackingException {
+	private byte[] encodeAsBytes() throws PackingException {
 		try (MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
 			byte[] payload = this.payload.encodeAsBytes();
 
@@ -150,10 +153,19 @@ public class Message {
 
 			return bytes;
 		} catch (IOException e) {
-			throw new UnpackingException();
+			throw new PackingException();
 		}
 	}
-
+	
+	public boolean validate() throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
+		// TODO: adjustable difficulty
+		if (payload.hash()[0] != 0) return false;
+		
+		PublicKeyManager pkm = new PublicKeyManager(payload.sender);
+		
+		return pkm.verify(payload.getEncoded(), signature);
+	}
+	
 	public byte[] getHash() {
 		return HashFunctions.hash160(this.encodeAsBytes());
 	}
