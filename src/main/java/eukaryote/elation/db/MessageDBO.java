@@ -1,7 +1,11 @@
 package eukaryote.elation.db;
 
 import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.skife.jdbi.v2.sqlobject.customizers.Mapper;
+
+import eukaryote.elation.Message;
 
 public interface MessageDBO {
 	@SqlUpdate("CREATE TABLE IF NOT EXISTS `messages` (\n" + 
@@ -29,5 +33,9 @@ public interface MessageDBO {
 			@Bind("room") String room, @Bind("sender") byte[] sender, @Bind("parent") byte[] parent,
 			@Bind("nonce") int nonce, @Bind("signature") byte[] signature);
 
+	@Mapper(MessageMapper.class)
+	@SqlQuery("SELECT * FROM messages WHERE hash = :hash")
+	Message getMessage(@Bind("hash") byte[] hash);
+	
 	void close();
 }

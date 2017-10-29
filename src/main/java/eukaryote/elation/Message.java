@@ -60,11 +60,14 @@ public class Message {
 
 		}
 
+		@Getter(lazy = true)
+		private final byte[] encoded = encodeAsBytes();
+
 		/**
 		 * Encode to bytes
 		 */
-		public byte[] encodeAsBytes() throws UnpackingException {
-			try(MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
+		private byte[] encodeAsBytes() throws UnpackingException {
+			try (MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
 
 				ret.packInt(nonce);
 
@@ -83,24 +86,24 @@ public class Message {
 				byte[] bytes = ret.toByteArray();
 
 				return bytes;
-			} catch(IOException e) {
+			} catch (IOException e) {
 				throw new UnpackingException();
 			}
 		}
-		
+
 		public byte[] hash() throws IOException {
 			return HashFunctions.hash160(encodeAsBytes());
 		}
 
 		public void doPOW() throws IOException {
 			// TODO: adjustable difficulty
-			while(hash()[0] != 0) {
+			while (hash()[0] != 0) {
 				nonce++;
 			}
 		}
 
 	}
-	
+
 	@Getter
 	Payload payload;
 
@@ -125,27 +128,33 @@ public class Message {
 
 	}
 
+	@Getter(lazy = true)
+	private final byte[] encoded = encodeAsBytes();
+
 	/**
 	 * Encode to bytes
 	 */
-	
-	public byte[] encodeAsBytes() throws UnpackingException {
-		try(MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
+	private byte[] encodeAsBytes() throws UnpackingException {
+		try (MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
 			byte[] payload = this.payload.encodeAsBytes();
-	
+
 			ret.packBinaryHeader(payload.length);
 			ret.addPayload(payload);
-	
+
 			ret.packBinaryHeader(signature.length);
 			ret.addPayload(signature);
-	
+
 			byte[] bytes = ret.toByteArray();
-	
+
 			ret.close();
-	
+
 			return bytes;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			throw new UnpackingException();
 		}
+	}
+
+	public byte[] getHash() {
+		return HashFunctions.hash160(this.encodeAsBytes());
 	}
 }
