@@ -18,6 +18,7 @@ import lombok.ToString;
 
 @EqualsAndHashCode
 @ToString
+@AllArgsConstructor
 public class Message {
 
 	/**
@@ -26,6 +27,7 @@ public class Message {
 	@EqualsAndHashCode
 	@AllArgsConstructor
 	@ToString
+	@Getter
 	public static class Payload {
 
 		long timestamp;
@@ -44,7 +46,7 @@ public class Message {
 		}
 
 		/**
-		 * Unpack message from bytes
+		 * Unpack payload from bytes
 		 */
 		public Payload(byte[] encoded) throws IOException {
 			MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(encoded);
@@ -58,48 +60,54 @@ public class Message {
 
 		}
 
+		@Getter(lazy = true)
+		private final byte[] encoded = encodeAsBytes();
+
 		/**
 		 * Encode to bytes
 		 */
-		public byte[] encodeAsBytes() throws IOException {
-			MessageBufferPacker ret = MessagePack.newDefaultBufferPacker();
+		private byte[] encodeAsBytes() throws UnpackingException {
+			try (MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
 
-			ret.packInt(nonce);
+				ret.packInt(nonce);
 
-			ret.packBinaryHeader(sender.length);
-			ret.addPayload(sender);
+				ret.packBinaryHeader(sender.length);
+				ret.addPayload(sender);
 
-			ret.packBinaryHeader(parent.length);
-			ret.addPayload(parent);
+				ret.packBinaryHeader(parent.length);
+				ret.addPayload(parent);
 
-			ret.packLong(timestamp);
+				ret.packLong(timestamp);
 
-			ret.packString(room);
+				ret.packString(room);
 
-			ret.packString(content);
+				ret.packString(content);
 
-			byte[] bytes = ret.toByteArray();
+				byte[] bytes = ret.toByteArray();
 
-			ret.close();
-
-			return bytes;
+				return bytes;
+			} catch (IOException e) {
+				throw new UnpackingException();
+			}
 		}
-		
+
 		public byte[] hash() throws IOException {
 			return HashFunctions.hash160(encodeAsBytes());
 		}
 
 		public void doPOW() throws IOException {
 			// TODO: adjustable difficulty
-			while(hash()[0] != 0) {
+			while (hash()[0] != 0) {
 				nonce++;
 			}
 		}
 
 	}
 
+	@Getter
 	Payload payload;
 
+	@Getter
 	byte[] signature;
 
 	public Message(KeyManager km, String content, String room, byte[] parent)
@@ -107,5 +115,46 @@ public class Message {
 		payload = new Payload(km, content, room, parent);
 		payload.doPOW();
 		signature = km.sign(payload.encodeAsBytes());
+	}
+
+	/**
+	 * Unpack message from bytes
+	 */
+	public Message(byte[] encoded) throws IOException {
+		MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(encoded);
+
+		payload = new Payload(unpacker.readPayload(unpacker.unpackBinaryHeader()));
+		signature = unpacker.readPayload(unpacker.unpackBinaryHeader());
+
+	}
+
+	@Getter(lazy = true)
+	private final byte[] encoded = encodeAsBytes();
+
+	/**
+	 * Encode to bytes
+	 */
+	private byte[] encodeAsBytes() throws UnpackingException {
+		try (MessageBufferPacker ret = MessagePack.newDefaultBufferPacker()) {
+			byte[] payload = this.payload.encodeAsBytes();
+
+			ret.packBinaryHeader(payload.length);
+			ret.addPayload(payload);
+
+			ret.packBinaryHeader(signature.length);
+			ret.addPayload(signature);
+
+			byte[] bytes = ret.toByteArray();
+
+			ret.close();
+
+			return bytes;
+		} catch (IOException e) {
+			throw new UnpackingException();
+		}
+	}
+
+	public byte[] getHash() {
+		return HashFunctions.hash160(this.encodeAsBytes());
 	}
 }
