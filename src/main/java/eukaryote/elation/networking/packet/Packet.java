@@ -16,7 +16,7 @@ public abstract class Packet {
 	
 	public abstract byte[] serialize();
 
-	public static Packet deserialize(byte[] packet) throws IOException {
+	public static Packet deserialize(byte[] packet) throws IOException, IllegalPacketException {
 		MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(packet);
 		String packetType = unpacker.unpackString();
 

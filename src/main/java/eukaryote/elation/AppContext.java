@@ -1,5 +1,9 @@
 package eukaryote.elation;
 
-public class AppContext {
+import eukaryote.elation.db.PersistenceProvider;
+import lombok.Getter;
 
+public class AppContext {
+	@Getter
+	PersistenceProvider persistenceProvider;
 }
