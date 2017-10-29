@@ -1,6 +1,7 @@
 package eukaryote.elation.db;
 
 import java.io.File;
+import java.util.List;
 
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
@@ -29,9 +30,9 @@ public class DBPersistenceProvider implements PersistenceProvider {
 
 	@Override
 	public void putMessage(Message m) {
-		mdbo.putMessage(m.getHash(), m.getPayload().getTimestamp(),
-				m.getPayload().getContent(), m.getPayload().getRoom(), m.getPayload().getSender(),
-				m.getPayload().getParent(), m.getPayload().getNonce(), m.getSignature());
+		mdbo.putMessage(m.getHash(), m.getPayload().getTimestamp(), m.getPayload().getContent(),
+				m.getPayload().getRoom(), m.getPayload().getSender(), m.getPayload().getParent(),
+				m.getPayload().getNonce(), m.getSignature());
 	}
 
 	@Override
@@ -40,15 +41,13 @@ public class DBPersistenceProvider implements PersistenceProvider {
 	}
 
 	@Override
-	public Message[] getMessagesByRoom(String room, long lowertime, long uppertime) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Message> getMessagesByRoom(String room, long lowertime, long uppertime) {
+		return mdbo.getMessagesByRoom(room, lowertime, uppertime);
 	}
 
 	@Override
-	public Message[] getChildren(byte[] parenthash) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Message> getChildren(byte[] parenthash) {
+		return mdbo.getChildren(parenthash);
 	}
 
 }

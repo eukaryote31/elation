@@ -17,10 +17,11 @@ public class TestMessage {
 
 		assertEquals(p, p2);
 	}
-	
+
 	@Test
 	public void testMessageSerialize() throws IOException {
-		Message.Payload payload = new Message.Payload("content", "room", new byte[] { 0, 1, 2 }, new byte[] { 0, 1, 2, 4 });
+		Message.Payload payload = new Message.Payload("content", "room", new byte[] { 0, 1, 2 },
+				new byte[] { 0, 1, 2, 4 });
 		Message p = new Message(payload, new byte[] { 0, 1, 2, 99 });
 
 		Message p2 = new Message(p.getEncoded());
