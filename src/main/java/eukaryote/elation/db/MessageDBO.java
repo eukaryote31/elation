@@ -24,7 +24,7 @@ public interface MessageDBO {
 
 	@SqlUpdate("INSERT OR IGNORE INTO `messages`(`hash`,`timestamp`,`content`,`room`,`sender`,`parent`,`nonce`,`signature`) "
 			+ "VALUES (:hash,:timestamp,:content,:room,:sender,:parent,:nonce,:signature);")
-	void putMessage(@Bind("hash") byte[] hash, @Bind("timestamp") long timestamp, @Bind("content") String content,
+	int putMessage(@Bind("hash") byte[] hash, @Bind("timestamp") long timestamp, @Bind("content") String content,
 			@Bind("room") String room, @Bind("sender") byte[] sender, @Bind("parent") byte[] parent,
 			@Bind("nonce") int nonce, @Bind("signature") byte[] signature);
 

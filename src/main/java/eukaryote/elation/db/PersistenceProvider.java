@@ -5,7 +5,7 @@ import java.util.List;
 import eukaryote.elation.Message;
 
 public interface PersistenceProvider {
-	public void putMessage(Message m);
+	public boolean putMessage(Message m);
 
 	public Message getMessageByHash(byte[] hash);
 

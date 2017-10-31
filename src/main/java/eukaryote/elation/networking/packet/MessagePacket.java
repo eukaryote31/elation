@@ -17,8 +17,10 @@ public class MessagePacket extends Packet {
 
 	@Override
 	public void executePacket(AppContext ctx) {
-		ctx.getPersistenceProvider().putMessage(msg);
+		boolean changed = ctx.getPersistenceProvider().putMessage(msg);
 
+		if (changed)
+			ctx.getConnections().broadcast(this);
 	}
 
 	@Override
@@ -27,7 +29,7 @@ public class MessagePacket extends Packet {
 			byte[] payload = this.msg.getEncoded();
 
 			ret.packString("msg");
-			
+
 			ret.packBinaryHeader(payload.length);
 			ret.addPayload(payload);
 
@@ -40,13 +42,13 @@ public class MessagePacket extends Packet {
 			throw new PackingException();
 		}
 	}
-	
+
 	static {
 		Packet.packetfactories.put("msg", new MessagePacketFactory());
 	}
 
 	private static class MessagePacketFactory implements PacketFactory<MessagePacket> {
-		
+
 		@Override
 		public MessagePacket build(MessageUnpacker unpacker) throws IllegalPacketException {
 			MessagePacket ret;

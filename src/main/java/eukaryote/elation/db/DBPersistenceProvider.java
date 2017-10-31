@@ -29,10 +29,12 @@ public class DBPersistenceProvider implements PersistenceProvider {
 	}
 
 	@Override
-	public void putMessage(Message m) {
-		mdbo.putMessage(m.getHash(), m.getPayload().getTimestamp(), m.getPayload().getContent(),
+	public boolean putMessage(Message m) {
+		int affected = mdbo.putMessage(m.getHash(), m.getPayload().getTimestamp(), m.getPayload().getContent(),
 				m.getPayload().getRoom(), m.getPayload().getSender(), m.getPayload().getParent(),
 				m.getPayload().getNonce(), m.getSignature());
+		
+		return affected != 0;
 	}
 
 	@Override
